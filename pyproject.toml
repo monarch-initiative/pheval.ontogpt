@@ -8,7 +8,32 @@ packages = [{include = "pheval_ontogpt", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+botocore = "^1.29.155"
+ontogpt = {path = "/Users/yaseminbridges/Documents/GitHub/ontogpt"}
+pheval = {path = "/Users/yaseminbridges/Documents/GitHub/pheval"}
 
+[tool.poetry.scripts]
+pheval-ontogpt = "pheval_ontogpt.cli:main"
+
+[tool.poetry.plugins."pheval.plugins"]
+ontogpt = "pheval_ontogpt.runner:OntoGPTPhEvalRunner"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+pylint = "^2.15.6"
+pycodestyle = "^2.10.0"
+coverage = "^6.5.0"
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310"]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 100
+include_trailing_comma = true
+reverse_relative = true
 
 [build-system]
 requires = ["poetry-core"]
