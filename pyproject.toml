@@ -9,8 +9,8 @@ packages = [{include = "pheval_ontogpt", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 botocore = "^1.29.155"
-ontogpt = {path = "/Users/yaseminbridges/Documents/GitHub/ontogpt"}
 pheval = {git = "https://github.com/monarch-initiative/pheval.git"}
+ontogpt = {git = "https://github.com/monarch-initiative/ontogpt.git"}
 
 [tool.poetry.scripts]
 pheval-ontogpt = "pheval_ontogpt.cli:main"
