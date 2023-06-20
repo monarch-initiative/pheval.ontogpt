@@ -6,6 +6,7 @@ from pheval.utils.file_utils import files_with_suffix
 
 
 def read_ontogpt_result(ontogpt_result_path: Path) -> [dict]:
+    """Read .json OntoGPT result."""
     with open(ontogpt_result_path, "r") as result:
         parsed_result = json.load(result)
     result.close()
@@ -13,7 +14,7 @@ def read_ontogpt_result(ontogpt_result_path: Path) -> [dict]:
 
 
 def trim_ontogpt_result(ontogpt_result_path: Path) -> Path:
-    """Trim .SVANNA from results filename."""
+    """Trim -ontogpt_result from results filename."""
     return Path(str(ontogpt_result_path.name.replace("-ontogpt_result", "")))
 
 
@@ -23,17 +24,21 @@ class PhEvalDiseaseResultFromOntoGPT:
 
     @staticmethod
     def obtain_score(result: dict) -> float:
+        """Obtain score."""
         return result["score"]
 
     @staticmethod
     def obtain_disease_name(result: dict) -> str:
+        """Obtain disease name."""
         return result["disease"]
 
     @staticmethod
     def obtain_omim_disease_id(result: dict) -> str:
+        """Obtain omim disease ID."""
         return result["omim_disease_id"]
 
     def extract_pheval_requirements(self) -> [PhEvalDiseaseResult]:
+        """Extract PhEval disease requirements."""
         pheval_disease_results = []
         for result in self.ontogpt_result:
             pheval_disease_results.append(
@@ -49,7 +54,7 @@ class PhEvalDiseaseResultFromOntoGPT:
 def create_standardised_results(
     raw_results_dir: Path, output_dir: Path, sort_order: str = "descending"
 ) -> None:
-    """Write standardised variant results from SvAnna tsv output."""
+    """Write standardised variant results from OntoGPT json output."""
     for result in files_with_suffix(raw_results_dir, ".json"):
         ontogpt_result = read_ontogpt_result(result)
         pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(

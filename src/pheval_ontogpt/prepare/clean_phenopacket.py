@@ -18,6 +18,7 @@ class PhenopacketCleaner:
         self.phenopacket.id = "patient1"
 
     def clean_phenopacket(self) -> Phenopacket:
+        """Clean phenopacket."""
         self.remove_interpretations()
         self.remove_diseases()
         self.rename_id()
