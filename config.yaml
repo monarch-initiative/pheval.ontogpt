@@ -1,0 +1,5 @@
+tool: ontogpt
+tool_version: 0.2.9
+phenotype_only: True
+disease_analysis: True
+tool_specific_configuration_options: None
