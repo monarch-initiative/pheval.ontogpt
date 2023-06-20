@@ -12,7 +12,7 @@ from oaklib.interfaces import MappingProviderInterface, TextAnnotatorInterface
 from ontogpt.engines.knowledge_engine import KnowledgeEngine
 from pydantic import BaseModel
 
-from pheval_ontogpt.promp_templates import DEFAULT_PHENOPACKET_PROMPT
+from pheval_ontogpt.prompt_templates import DEFAULT_PHENOPACKET_PROMPT
 
 logger = logging.getLogger(__name__)
 
