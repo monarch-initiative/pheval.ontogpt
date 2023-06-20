@@ -57,6 +57,8 @@ def create_standardised_results(
     """Write standardised variant results from OntoGPT json output."""
     for result in files_with_suffix(raw_results_dir, ".json"):
         ontogpt_result = read_ontogpt_result(result)
+        if len(ontogpt_result) == 0:
+            continue
         pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(
             ontogpt_result
         ).extract_pheval_requirements()
