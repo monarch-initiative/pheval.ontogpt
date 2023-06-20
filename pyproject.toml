@@ -10,7 +10,7 @@ packages = [{include = "pheval_ontogpt", from = "src"}]
 python = "^3.10"
 botocore = "^1.29.155"
 ontogpt = {path = "/Users/yaseminbridges/Documents/GitHub/ontogpt"}
-pheval = {path = "/Users/yaseminbridges/Documents/GitHub/pheval"}
+pheval = {git = "https://github.com/monarch-initiative/pheval.git"}
 
 [tool.poetry.scripts]
 pheval-ontogpt = "pheval_ontogpt.cli:main"

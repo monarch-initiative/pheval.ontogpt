@@ -3323,8 +3323,10 @@ seaborn = "^0.12.2"
 tqdm = ">=4.64.1"
 
 [package.source]
-type = "directory"
-url = "../pheval"
+type = "git"
+url = "https://github.com/monarch-initiative/pheval.git"
+reference = "HEAD"
+resolved_reference = "f016ce7f007cc2a1eff252a247c169ea397b8534"
 
 [[package]]
 name = "pillow"
@@ -5542,4 +5544,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "bfac3eb78f32a0d6389111a749452e7ec2a0b6d74383ef5d776b105073b9ad0f"
+content-hash = "51d51f58858bab941834a560256ac4684b35f629b6c0fc574dd9fa1071231e36"
