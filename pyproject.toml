@@ -4,13 +4,13 @@ version = "0.1.0"
 description = ""
 authors = ["Yasemin Bridges <y.bridges@qmul.ac.uk>"]
 readme = "README.md"
-packages = [{include = "pheval_ontogpt", from = "src"}]
+packages = [{ include = "pheval_ontogpt", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 botocore = "^1.29.155"
-pheval = {git = "https://github.com/monarch-initiative/pheval.git"}
-ontogpt = {git = "https://github.com/monarch-initiative/ontogpt.git"}
+pheval = { git = "https://github.com/monarch-initiative/pheval.git" }
+ontogpt = { git = "https://github.com/monarch-initiative/ontogpt.git" }
 
 [tool.poetry.scripts]
 pheval-ontogpt = "pheval_ontogpt.cli:main"
@@ -23,6 +23,11 @@ pytest = "^7.1.2"
 pylint = "^2.15.6"
 pycodestyle = "^2.10.0"
 coverage = "^6.5.0"
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src"
+]
 
 [tool.black]
 line-length = 100
