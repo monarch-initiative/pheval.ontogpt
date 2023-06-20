@@ -4,6 +4,9 @@ from pathlib import Path
 
 from pheval.runners.runner import PhEvalRunner
 
+from pheval_ontogpt.post_process.post_process import post_process_results_format
+from pheval_ontogpt.run.run import run_basic
+
 
 @dataclass
 class OntoGPTPhEvalRunner(PhEvalRunner):
@@ -23,7 +26,9 @@ class OntoGPTPhEvalRunner(PhEvalRunner):
     def run(self):
         """run"""
         print("running with OntoGPT")
+        run_basic(self.testdata_dir, self.raw_results_dir)
 
     def post_process(self):
         """post_process"""
         print("post processing")
+        post_process_results_format(self.raw_results_dir, self.output_dir)
