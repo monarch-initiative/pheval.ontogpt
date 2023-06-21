@@ -5,7 +5,7 @@ from pheval.post_processing.post_processing import PhEvalDiseaseResult
 from pheval_ontogpt.post_process.post_process_results_format import PhEvalDiseaseResultFromOntoGPT
 
 ontogpt_result = {
-    "disease": "Glutaric Aciduria Type I",
+    "disease_name": "Glutaric Aciduria Type I",
     "omim_disease_id": "231670",
     "score": 0.8,
     "rank": 1,
@@ -20,7 +20,7 @@ ontogpt_result = {
 }
 ontogpt_results = [
     {
-        "disease": "Glutaric Aciduria Type I",
+        "disease_name": "Glutaric Aciduria Type I",
         "omim_disease_id": "231670",
         "score": 0.8,
         "rank": 1,
@@ -34,7 +34,7 @@ ontogpt_results = [
         "disease_ids": ["MONDO:0009281"],
     },
     {
-        "disease": "Glutaryl-CoA dehydrogenase deficiency",
+        "disease_name": "Glutaryl-CoA dehydrogenase deficiency",
         "omim_disease_id": "231680",
         "score": 0.6,
         "rank": 2,
