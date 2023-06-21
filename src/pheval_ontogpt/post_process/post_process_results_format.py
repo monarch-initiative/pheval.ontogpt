@@ -30,7 +30,7 @@ class PhEvalDiseaseResultFromOntoGPT:
     @staticmethod
     def obtain_disease_name(result: dict) -> str:
         """Obtain disease name."""
-        return result["disease"]
+        return result["disease_name"]
 
     @staticmethod
     def obtain_omim_disease_id(result: dict) -> str:

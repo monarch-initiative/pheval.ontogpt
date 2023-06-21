@@ -120,7 +120,7 @@ class PhenoEngine(KnowledgeEngine):
         if not isinstance(mondo, TextAnnotatorInterface):
             raise ValueError("Mondo adapter must implement TextAnnotatorInterface")
         for diagnosis in diagnoses:
-            disease_label = diagnosis["disease"]
+            disease_label = diagnosis["disease_name"]
             anns = list(mondo.annotate_text(disease_label, config))
             # print(anns)
             diagnosis["disease_ids"] = [ann.object_id for ann in anns]
