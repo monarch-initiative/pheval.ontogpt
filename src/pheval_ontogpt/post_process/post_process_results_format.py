@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import click
 from pheval.post_processing.post_processing import PhEvalDiseaseResult, generate_pheval_result
 from pheval.utils.file_utils import files_with_suffix
 
@@ -56,12 +57,37 @@ def create_standardised_results(
 ) -> None:
     """Write standardised variant results from OntoGPT json output."""
     for result in files_with_suffix(raw_results_dir, ".json"):
-        ontogpt_result = read_ontogpt_result(result)
-        if len(ontogpt_result) == 0:
-            continue
-        pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(
-            ontogpt_result
-        ).extract_pheval_requirements()
-        generate_pheval_result(
-            pheval_disease_result, sort_order, output_dir, trim_ontogpt_result(result)
-        )
+        try:
+            print(result)
+            ontogpt_result = read_ontogpt_result(result)
+            if len(ontogpt_result) == 0:
+                continue
+            pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(
+                ontogpt_result
+            ).extract_pheval_requirements()
+            generate_pheval_result(
+                pheval_disease_result, sort_order, output_dir, trim_ontogpt_result(result)
+            )
+        except KeyError:
+            pass
+
+
+@click.command("standardise")
+@click.option(
+    "--output-dir",
+    "-o",
+    required=True,
+    metavar="PATH",
+    help="Output directory for standardised results.",
+    type=Path,
+)
+@click.option(
+    "--raw-results-dir",
+    "-R",
+    required=True,
+    metavar="DIRECTORY",
+    help="Full path to Ontogpt results directory to be standardised.",
+    type=Path,
+)
+def create_standardised_results_command(raw_results_dir: Path, output_dir: Path):
+    create_standardised_results(raw_results_dir, output_dir)
