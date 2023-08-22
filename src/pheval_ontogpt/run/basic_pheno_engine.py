@@ -119,6 +119,10 @@ class PhenoEngine(KnowledgeEngine):
         config = TextAnnotationConfiguration(matches_whole_text=True)
         if not isinstance(mondo, TextAnnotatorInterface):
             raise ValueError("Mondo adapter must implement TextAnnotatorInterface")
+        if type(diagnoses) is list:
+            pass
+        if type(diagnoses) is dict:
+            diagnoses = diagnoses[list(diagnoses.keys())[0]]
         for diagnosis in diagnoses:
             disease_label = diagnosis["disease_name"]
             anns = list(mondo.annotate_text(disease_label, config))
