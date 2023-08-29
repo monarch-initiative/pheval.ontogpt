@@ -24,9 +24,9 @@ def write_json_result(
     outfile.close()
 
 
-def run_phenopackets(phenopacket_dir: Path, raw_results_dir: Path) -> None:
+def run_phenopackets(phenopacket_dir: Path, raw_results_dir: Path, model: str) -> None:
     """Run a directory of phenopackets on the basic PhenoEngine."""
-    pheno_engine = PhenoEngine()
+    pheno_engine = PhenoEngine(model=model)
     for phenopacket_path in all_files(phenopacket_dir):
         phenopacket = phenopacket_reader(phenopacket_path)
         clean_phenopacket = PhenopacketCleaner(phenopacket).clean_phenopacket()
