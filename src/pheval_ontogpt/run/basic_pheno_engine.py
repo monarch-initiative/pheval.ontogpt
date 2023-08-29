@@ -16,7 +16,6 @@ from pheval_ontogpt.prompt_templates import DEFAULT_PHENOPACKET_PROMPT
 
 logger = logging.getLogger(__name__)
 
-
 # TODO: use phenopacket python datamodel
 PHENOPACKET = Dict[str, Any]
 DIAGNOSIS = Dict[str, Any]
@@ -38,7 +37,8 @@ class DiagnosisPrediction(BaseModel):
 
 @dataclass
 class PhenoEngine(KnowledgeEngine):
-    completion_length = 850
+    model = None
+    completion_length = 650
     _mondo: TextAnnotatorInterface = None
 
     @property
@@ -48,7 +48,7 @@ class PhenoEngine(KnowledgeEngine):
         return self._mondo
 
     def predict_disease(
-        self, phenopacket: PHENOPACKET, template_path: Union[str, Path] = None
+            self, phenopacket: PHENOPACKET, template_path: Union[str, Path] = None
     ) -> List[DIAGNOSIS]:
         if template_path is None:
             template_path = DEFAULT_PHENOPACKET_PROMPT
@@ -59,19 +59,22 @@ class PhenoEngine(KnowledgeEngine):
             with open(template_path) as file:
                 template_txt = file.read()
                 template = Template(template_txt)
-        prompt = template.render(
-            phenopacket=phenopacket,
-        )
-        payload = self.client.complete(prompt, max_tokens=self.completion_length)
-        # print(payload)
-        try:
-            obj = json.loads(payload)
-        except json.JSONDecodeError as e:
-            logger.error(f"Error decoding JSON: {e}")
-            logger.error(f"Payload: {payload}")
-            obj = []
-        self.enhance_payload(obj)
-        return obj
+        for attempt in range(10):
+            prompt = template.render(
+                phenopacket=phenopacket,
+            )
+            payload = self.client.complete(prompt, max_tokens=self.completion_length)
+            payload = payload.replace(',\n  }', '\n  }')
+
+            try:
+                obj = json.loads(payload)
+                self.enhance_payload(obj)
+                return obj
+            except json.JSONDecodeError as e:
+                logger.error(f"Error decoding JSON: {e}")
+                logger.error(f"Payload: {payload}")
+        logger.error("Max attempts reached, unable to obtain valid JSON payload.")
+        return []
 
     def evaluate(self, phenopackets: List[PHENOPACKET]) -> List[DiagnosisPrediction]:
         mondo = self.mondo
