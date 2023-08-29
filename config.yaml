@@ -3,4 +3,6 @@ tool_version: 0.2.9
 variant_analysis: False
 gene_analysis: False
 disease_analysis: True
-tool_specific_configuration_options: None
+tool_specific_configuration_options:
+  # select from gpt-3.5-turbo-16k, gpt-3.5-turbo, gpt-4, gpt-4-32k
+  model: gpt-4
