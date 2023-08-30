@@ -48,7 +48,7 @@ class PhenoEngine(KnowledgeEngine):
         return self._mondo
 
     def predict_disease(
-            self, phenopacket: PHENOPACKET, template_path: Union[str, Path] = None
+        self, phenopacket: PHENOPACKET, template_path: Union[str, Path] = None
     ) -> List[DIAGNOSIS]:
         if template_path is None:
             template_path = DEFAULT_PHENOPACKET_PROMPT
@@ -59,12 +59,12 @@ class PhenoEngine(KnowledgeEngine):
             with open(template_path) as file:
                 template_txt = file.read()
                 template = Template(template_txt)
-        for attempt in range(10):
+        for _attempt in range(10):
             prompt = template.render(
                 phenopacket=phenopacket,
             )
             payload = self.client.complete(prompt, max_tokens=self.completion_length)
-            payload = payload.replace(',\n  }', '\n  }')
+            payload = payload.replace(",\n  }", "\n  }")
 
             try:
                 obj = json.loads(payload)

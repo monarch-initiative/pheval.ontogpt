@@ -7,6 +7,7 @@ class PhenopacketCleaner:
     Class for 'cleaning' a phenopacket from any disease-identifying elements including:
     disease and interpretation objects,
     """
+
     def __init__(self, phenopacket: Phenopacket):
         self.phenopacket = phenopacket
 

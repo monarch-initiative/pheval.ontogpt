@@ -1,6 +1,8 @@
 import click
 
-from pheval_ontogpt.post_process.post_process_results_format import create_standardised_results_command
+from pheval_ontogpt.post_process.post_process_results_format import (
+    create_standardised_results_command,
+)
 
 
 @click.group()
