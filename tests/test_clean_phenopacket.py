@@ -197,9 +197,8 @@ class TestPhenopacketCleaner(unittest.TestCase):
             phenopacket_cleaner.phenopacket,
             Phenopacket(
                 id="patient1",
-                subject=Individual(id="test-subject-1", sex=1),
+                subject=Individual(id="test-subject-1", sex=1, taxonomy=OntologyClass()),
                 phenotypic_features=phenotypic_features_with_excluded,
-                files=phenopacket_files,
-                meta_data=phenopacket_metadata,
+                meta_data=MetaData(),
             ),
         )
