@@ -58,9 +58,12 @@ def create_standardised_results(
     """Write standardised variant results from OntoGPT json output."""
     for result in files_with_suffix(raw_results_dir, ".json"):
         try:
-            print(result)
             ontogpt_result = read_ontogpt_result(result)
             if len(ontogpt_result) == 0:
+                trimmed_result = trim_ontogpt_result(result)
+                new_filename = str(trimmed_result).replace(".json", "-pheval_disease_result.tsv")
+                output_path = output_dir.joinpath(f"pheval_disease_results/{new_filename}")
+                open(output_path, "w").close()
                 continue
             pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(
                 ontogpt_result
@@ -69,7 +72,10 @@ def create_standardised_results(
                 pheval_disease_result, sort_order, output_dir, trim_ontogpt_result(result)
             )
         except KeyError:
-            pass
+            trimmed_result = trim_ontogpt_result(result)
+            new_filename = str(trimmed_result).replace(".json", "-pheval_disease_result.tsv")
+            output_path = output_dir.joinpath(f"pheval_disease_results/{new_filename}")
+            open(output_path, "w").close()
 
 
 @click.command("standardise")
@@ -90,4 +96,5 @@ def create_standardised_results(
     type=Path,
 )
 def create_standardised_results_command(raw_results_dir: Path, output_dir: Path):
+    output_dir.joinpath("pheval_disease_results").mkdir(exist_ok=True)
     create_standardised_results(raw_results_dir, output_dir)
