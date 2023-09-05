@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+import openai.error
 from jinja2 import Template
 from oaklib import get_adapter
 from oaklib.datamodels.text_annotator import TextAnnotationConfiguration
@@ -38,7 +39,7 @@ class DiagnosisPrediction(BaseModel):
 @dataclass
 class PhenoEngine(KnowledgeEngine):
     model = None
-    completion_length = 650
+    completion_length = 700
     _mondo: TextAnnotatorInterface = None
 
     @property
@@ -59,7 +60,7 @@ class PhenoEngine(KnowledgeEngine):
             with open(template_path) as file:
                 template_txt = file.read()
                 template = Template(template_txt)
-        for _attempt in range(10):
+        try:
             prompt = template.render(
                 phenopacket=phenopacket,
             )
@@ -73,8 +74,9 @@ class PhenoEngine(KnowledgeEngine):
             except json.JSONDecodeError as e:
                 logger.error(f"Error decoding JSON: {e}")
                 logger.error(f"Payload: {payload}")
-        logger.error("Max attempts reached, unable to obtain valid JSON payload.")
-        return []
+            return []
+        except openai.error.InvalidRequestError:
+            return []
 
     def evaluate(self, phenopackets: List[PHENOPACKET]) -> List[DiagnosisPrediction]:
         mondo = self.mondo
