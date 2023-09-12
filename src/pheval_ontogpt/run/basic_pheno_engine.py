@@ -1,6 +1,7 @@
 """Reasoner engine."""
 import json
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -12,8 +13,6 @@ from oaklib.datamodels.text_annotator import TextAnnotationConfiguration
 from oaklib.interfaces import MappingProviderInterface, TextAnnotatorInterface
 from ontogpt.engines.knowledge_engine import KnowledgeEngine
 from pydantic import BaseModel
-
-from pheval_ontogpt.prompt_templates import DEFAULT_PHENOPACKET_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +47,11 @@ class PhenoEngine(KnowledgeEngine):
             self._mondo = get_adapter("sqlite:obo:mondo")
         return self._mondo
 
-    def predict_disease(
+    def predict(
         self, phenopacket: PHENOPACKET, template_path: Union[str, Path] = None
     ) -> List[DIAGNOSIS]:
-        if template_path is None:
-            template_path = DEFAULT_PHENOPACKET_PROMPT
+        # if template_path is None:
+        #     template_path = DEFAULT_PHENOPACKET_PROMPT
         if isinstance(template_path, Path):
             template_path = str(template_path)
         if isinstance(template_path, str):
@@ -66,12 +65,25 @@ class PhenoEngine(KnowledgeEngine):
             )
             payload = self.client.complete(prompt, max_tokens=self.completion_length)
             payload = payload.replace(",\n  }", "\n  }")
+            payload = payload.replace('"}', "}")
 
-            try:
+            try:  # try load as JSON
                 obj = json.loads(payload)
-                self.enhance_payload(obj)
+                # self.enhance_payload(obj)
                 return obj
             except json.JSONDecodeError as e:
+                logger.error(f"Error decoding - trying again: {payload}")
+                match = re.search(r"\[.*?\]", payload, re.DOTALL)
+                if match:
+                    if match.group() != payload:
+                        try:
+                            obj = json.loads(match.group())
+                            # self.enhance_payload(obj)
+                            return obj
+                        except json.JSONDecodeError as e:
+                            logger.error(f"Error decoding JSON: {e}")
+                            logger.error(f"Payload: {payload}")
+                            return []
                 logger.error(f"Error decoding JSON: {e}")
                 logger.error(f"Payload: {payload}")
             return []
@@ -100,7 +112,7 @@ class PhenoEngine(KnowledgeEngine):
                     dp.validated_mondo_disease_labels.append(mondo.label(mondo_id))
                 else:
                     logger.warning(f"Could not normalize {disease_id} to MONDO")
-            diagnoses = self.predict_disease(phenopacket)
+            diagnoses = self.predict(phenopacket)
             dp.predicted_disease_ids = []
             dp.predicted_disease_labels = []
             dp.rank = 999
@@ -132,5 +144,5 @@ class PhenoEngine(KnowledgeEngine):
             disease_label = diagnosis["disease_name"]
             anns = list(mondo.annotate_text(disease_label, config))
             # print(anns)
-            diagnosis["disease_ids"] = [ann.object_id for ann in anns]
+            diagnosis["disease_ids"] = list(set([ann.object_id for ann in anns]))
         return diagnoses
