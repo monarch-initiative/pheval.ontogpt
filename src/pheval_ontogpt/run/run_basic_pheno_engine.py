@@ -6,12 +6,18 @@ from pheval.utils.file_utils import all_files
 from pheval.utils.phenopacket_utils import phenopacket_reader
 
 from pheval_ontogpt.prepare.clean_phenopacket import PhenopacketCleaner
+from pheval_ontogpt.prompt_templates import DISEASE_PHENOPACKET_PROMPT, GENE_PHENOPACKET_PROMPT
 from pheval_ontogpt.run.basic_pheno_engine import PhenoEngine
 
 
-def run_phenopacket(pheno_engine: PhenoEngine, phenopacket: Phenopacket):
+def run_phenopacket(
+    pheno_engine: PhenoEngine, phenopacket: Phenopacket, gene_analysis: bool, disease_analysis: bool
+):
     """Run pheno engine on a single phenopacket."""
-    return pheno_engine.predict_disease(phenopacket)
+    if gene_analysis:
+        return pheno_engine.predict(phenopacket, GENE_PHENOPACKET_PROMPT)
+    elif disease_analysis:
+        return pheno_engine.predict(phenopacket, DISEASE_PHENOPACKET_PROMPT)
 
 
 def write_json_result(
@@ -24,11 +30,18 @@ def write_json_result(
     outfile.close()
 
 
-def run_phenopackets(phenopacket_dir: Path, raw_results_dir: Path, model: str) -> None:
+def run_phenopackets(
+    phenopacket_dir: Path,
+    raw_results_dir: Path,
+    model: str,
+    gene_analysis: bool,
+    disease_analysis: bool,
+) -> None:
     """Run a directory of phenopackets on the basic PhenoEngine."""
     pheno_engine = PhenoEngine(model=model)
     for phenopacket_path in all_files(phenopacket_dir):
+        print(phenopacket_path)
         phenopacket = phenopacket_reader(phenopacket_path)
         clean_phenopacket = PhenopacketCleaner(phenopacket).clean_phenopacket()
-        result = run_phenopacket(pheno_engine, clean_phenopacket)
+        result = run_phenopacket(pheno_engine, clean_phenopacket, gene_analysis, disease_analysis)
         write_json_result(result, raw_results_dir, phenopacket_path)
