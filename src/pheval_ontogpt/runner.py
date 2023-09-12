@@ -30,7 +30,13 @@ class OntoGPTPhEvalRunner(PhEvalRunner):
         tool_specific_configurations = OntoGPTToolSpecificConfigurations.parse_obj(
             self.input_dir_config.tool_specific_configuration_options
         )
-        run_basic(self.testdata_dir, self.raw_results_dir, tool_specific_configurations.model)
+        run_basic(
+            self.testdata_dir,
+            self.raw_results_dir,
+            tool_specific_configurations.model,
+            self.input_dir_config.gene_analysis,
+            self.input_dir_config.disease_analysis,
+        )
 
     def post_process(self):
         """post_process"""
