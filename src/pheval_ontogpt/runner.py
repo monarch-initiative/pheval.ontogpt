@@ -41,4 +41,5 @@ class OntoGPTPhEvalRunner(PhEvalRunner):
     def post_process(self):
         """post_process"""
         print("post processing")
-        post_process_results_format(self.raw_results_dir, self.output_dir)
+        post_process_results_format(self.raw_results_dir, self.output_dir, self.input_dir_config.gene_analysis,
+                                    self.input_dir_config.disease_analysis)
