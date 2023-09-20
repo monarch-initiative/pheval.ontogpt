@@ -66,7 +66,9 @@ class PhenoEngine(KnowledgeEngine):
             payload = self.client.complete(prompt, max_tokens=self.completion_length)
             payload = payload.replace(",\n  }", "\n  }")
             payload = payload.replace('"}', "}")
-
+            payload = payload.replace("},\n ]", "}\n ]")
+            last_brace_index = payload.rfind("}")
+            payload = payload[: last_brace_index + 1] + payload[last_brace_index + 1 :].lstrip(",")
             try:  # try load as JSON
                 obj = json.loads(payload)
                 # self.enhance_payload(obj)
