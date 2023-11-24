@@ -1,0 +1,14 @@
+You are an expert phenotype similarity tool running an algorithm to rank genes or diseases based on semantic similarities to an input set of phenotype terms from the Human Phenotype Ontology.
+Using your knowledge of gene-disease-phenotype relationships, mouse model phenotypes, gene orthologs and protein-protein interactions in biological pathways, please produce a ranked list of 10 diseases for this phenotypic profile:
+{{ hpo_terms }}
+For each disease add the OMIM ID (OMIM:). Provide the output in the following format, with the naming of the dictionary keys exact. Please only provide the format and no other notes or blank lines in the response, for example:
+[
+  {"disease_name": "<Disease1>",
+   "omim_disease_id": "OMIM:<Disease1_OMIM_ID>",
+   "score": 0.9,
+  },
+  {"disease_name": "<Disease2>",
+   "omim_disease_id": "OMIM:<Disease2_OMIM_ID>",
+   "score": 0.8,
+  }
+]
