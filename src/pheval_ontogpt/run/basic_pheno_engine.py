@@ -60,8 +60,9 @@ class PhenoEngine(KnowledgeEngine):
                 template_txt = file.read()
                 template = Template(template_txt)
         try:
+            hpo_terms = [hpo_term.type.label for hpo_term in phenopacket.phenotypic_features]
             prompt = template.render(
-                phenopacket=phenopacket,
+                hpo_terms=hpo_terms,
             )
             payload = self.client.complete(prompt, max_tokens=self.completion_length)
             payload = payload.replace(",\n  }", "\n  }")
