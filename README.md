@@ -24,7 +24,13 @@ tool_version: 0.2.9
 variant_analysis: False
 gene_analysis: False
 disease_analysis: True
-tool_specific_configuration_options: None
+tool_specific_configuration_options:
+  # select from gpt-3.5-turbo-16k, gpt-3.5-turbo, gpt-4, gpt-4-32k
+  model: gpt-4
+  # specify the prompt you wish to use
+  template: simple_disease_request_template.jinja2
+  # specify the name of the constrained list of genes or diseases file you wish to use (optional)
+  constrained_list_path:
 ```
 
 The bare minimum fields are filled to give an idea on the requirements. An example config has been provided pheval.ontogpt/config.yaml.
@@ -35,13 +41,18 @@ Where . is the root of the input directory
 
 ```tree
 .
-└── config.yaml
+├── config.yaml
+└── gene_request_template.jinja2
+
 ```
+
+If you wish to use a constrained list of genes or diseases and provide that to the LLM to predict the diagnosis from that list, you should provide the relative path to the input directory of a text file containing all genes/diseases contained to one line, each item separated by a comma.
+
 
 ## Configuring the prompt
 
-If you wish to alter the prompt given to the API, you can alter the template located in 
-`pheval.ontogpt/src/pheval_ontogpt/prompt_templates/template.jinja2`. However, you **must** retain the output format outlined.
+If you wish to alter the prompt given to the API, you can alter any of the template located in 
+`pheval.ontogpt/src/pheval_ontogpt/prompt_templates/`. However, you **must** retain the output format outlined.
 
 
 ## Test data directory structure
