@@ -1,4 +1,4 @@
-"""SvAnna Runner"""
+"""OntoGPT Runner"""
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -35,8 +35,10 @@ class OntoGPTPhEvalRunner(PhEvalRunner):
             self.testdata_dir,
             self.raw_results_dir,
             tool_specific_configurations.model,
-            self.input_dir_config.gene_analysis,
-            self.input_dir_config.disease_analysis,
+            self.input_dir.joinpath(tool_specific_configurations.template),
+            self.input_dir.joinpath(tool_specific_configurations.constrained_list_path)
+            if tool_specific_configurations.constrained_list_path is not None
+            else None,
         )
 
     def post_process(self):
