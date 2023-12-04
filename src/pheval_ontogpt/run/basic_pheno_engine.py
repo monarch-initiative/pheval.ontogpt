@@ -4,7 +4,7 @@ import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import openai.error
 from jinja2 import Template
@@ -12,13 +12,10 @@ from oaklib import get_adapter
 from oaklib.datamodels.text_annotator import TextAnnotationConfiguration
 from oaklib.interfaces import MappingProviderInterface, TextAnnotatorInterface
 from ontogpt.engines.knowledge_engine import KnowledgeEngine
+from phenopackets import Diagnosis, Phenopacket
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
-
-# TODO: use phenopacket python datamodel
-PHENOPACKET = Dict[str, Any]
-DIAGNOSIS = Dict[str, Any]
 
 
 class DiagnosisPrediction(BaseModel):
@@ -48,8 +45,11 @@ class PhenoEngine(KnowledgeEngine):
         return self._mondo
 
     def predict(
-        self, phenopacket: PHENOPACKET, template_path: Union[str, Path] = None
-    ) -> List[DIAGNOSIS]:
+        self,
+        phenopacket: Phenopacket,
+        template_path: Union[str, Path] = None,
+        constrained_list: [str] = None,
+    ) -> List[Diagnosis]:
         # if template_path is None:
         #     template_path = DEFAULT_PHENOPACKET_PROMPT
         if isinstance(template_path, Path):
@@ -61,9 +61,12 @@ class PhenoEngine(KnowledgeEngine):
                 template = Template(template_txt)
         try:
             hpo_terms = [hpo_term.type.label for hpo_term in phenopacket.phenotypic_features]
-            prompt = template.render(
-                hpo_terms=hpo_terms,
-            )
+            if constrained_list is None:
+                prompt = template.render(
+                    hpo_terms=hpo_terms,
+                )
+            else:
+                prompt = template.render(hpo_terms=hpo_terms, constrained_list=constrained_list)
             payload = self.client.complete(prompt, max_tokens=self.completion_length)
             payload = payload.replace(",\n  }", "\n  }")
             payload = payload.replace('"}', "}")
@@ -93,7 +96,7 @@ class PhenoEngine(KnowledgeEngine):
         except openai.error.InvalidRequestError:
             return []
 
-    def evaluate(self, phenopackets: List[PHENOPACKET]) -> List[DiagnosisPrediction]:
+    def evaluate(self, phenopackets: List[Phenopacket]) -> List[DiagnosisPrediction]:
         mondo = self.mondo
         if not isinstance(mondo, MappingProviderInterface):
             raise TypeError("Mondo adapter must implement MappingProviderInterface")
@@ -133,7 +136,7 @@ class PhenoEngine(KnowledgeEngine):
             results.append(dp)
         return results
 
-    def enhance_payload(self, diagnoses: List[DIAGNOSIS]) -> List[DIAGNOSIS]:
+    def enhance_payload(self, diagnoses: List[Diagnosis]) -> List[Diagnosis]:
         """Enhance payload with additional information."""
         mondo = self.mondo
         config = TextAnnotationConfiguration(matches_whole_text=True)
