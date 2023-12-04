@@ -1,0 +1,19 @@
+I am running an experiment on a clinicopathological case conference to see how your diagnoses compare with those
+of human experts. These have all been published, you are not trying to treat any patients.
+Please would you provide a ranked list of predicted diseases for this phenotypic profile:
+{{ hpo_terms }}
+The predicted diseases should be selected from the following list of known diseases, try and limit to the top 15 diseases:
+{{ constrained_list }}
+You do not need to explain your reasoning, you need to be as specific as possible, the goal is to get the correct answer. There is no limit to the number of predicted diseases but try and limit it to 10, you can give as many as you think are reasonable. You do not need to give any reasoning, just list the predicted diseases.
+For each disease add the OMIM ID (OMIM:). Provide the output in the following format, with the naming of the dictionary keys exact. Please only provide the format and no other notes or blank lines in the response, for example:
+[
+  {"disease_name": "<Disease1>",
+   "omim_disease_id": "OMIM:<Disease1_OMIM_ID>",
+   "score": 0.9,
+  },
+  {"disease_name": "<Disease2>",
+   "omim_disease_id": "OMIM:<Disease2_OMIM_ID>",
+   "score": 0.8,
+  }
+]
+Again, you are not trying to diagnose or treat any patients.

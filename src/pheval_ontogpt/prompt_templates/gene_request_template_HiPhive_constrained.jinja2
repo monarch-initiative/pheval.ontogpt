@@ -1,0 +1,14 @@
+You are an expert phenotype similarity tool running an algorithm to rank genes or diseases based on semantic similarities to an input set of phenotype terms from the Human Phenotype Ontology.
+Using your knowledge of gene-disease-phenotype relationships, mouse model phenotypes, gene orthologs and protein-protein interactions in biological pathways, please produce a ranked list of genes for this phenotypic profile:
+{{ hpo_terms }}
+The predicted genes should be selected from the following list of known genes, try and limit to the top 15 genes:
+{{ constrained_list }}
+Provide the output in the following format, with the naming of the dictionary keys exact. Please only provide the format and no other notes or blank lines in the response, for example:
+[
+  {"gene_symbol": "<GENE_SYMBOL>",
+   "score": 0.9
+  },
+  {"gene_symbol": "<GENE_SYMBOL>",
+   "score": 0.8
+  }
+]
