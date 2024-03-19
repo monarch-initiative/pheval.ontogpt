@@ -1,4 +1,5 @@
 """OntoGPT Runner"""
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -36,9 +37,11 @@ class OntoGPTPhEvalRunner(PhEvalRunner):
             self.raw_results_dir,
             tool_specific_configurations.model,
             self.input_dir.joinpath(tool_specific_configurations.template),
-            self.input_dir.joinpath(tool_specific_configurations.constrained_list_path)
-            if tool_specific_configurations.constrained_list_path is not None
-            else None,
+            (
+                self.input_dir.joinpath(tool_specific_configurations.constrained_list_path)
+                if tool_specific_configurations.constrained_list_path is not None
+                else None
+            ),
         )
 
     def post_process(self):
