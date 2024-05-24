@@ -11,12 +11,22 @@ from pheval.utils.file_utils import files_with_suffix
 from pheval.utils.phenopacket_utils import GeneIdentifierUpdater, create_hgnc_dict
 
 
-def read_ontogpt_result(ontogpt_result_path: Path) -> [dict]:
+def read_ontogpt_result(
+    ontogpt_result_path: Path, gene_analysis: bool = False, disease_analysis: bool = False
+) -> [dict]:
     """Read .json OntoGPT result."""
     with open(ontogpt_result_path, "r") as result:
         parsed_result = json.load(result)
     result.close()
-    return parsed_result
+    if all(key in parsed_result for key in ["score", "gene_symbol"]) and gene_analysis:
+        return parsed_result
+    if (
+        all(key in parsed_result for key in ["score", "disease_name", "omim_disease_id"])
+        and disease_analysis
+    ):
+        return parsed_result
+    else:
+        return None
 
 
 def trim_ontogpt_result(ontogpt_result_path: Path) -> Path:
@@ -139,13 +149,6 @@ class PhEvalGeneResultFromOntoGPT:
         return pheval_gene_results
 
 
-def create_empty_results_file(output_dir: Path, result: Path, file_type: str):
-    trimmed_result = trim_ontogpt_result(result)
-    new_filename = str(trimmed_result).replace(".json", f"-pheval_{file_type}_result.tsv")
-    output_path = output_dir.joinpath(f"pheval_{file_type}_results/{new_filename}")
-    open(output_path, "w").close()
-
-
 def create_standardised_results(
     raw_results_dir: Path,
     output_dir: Path,
@@ -158,44 +161,31 @@ def create_standardised_results(
     gene_identifier_updator = GeneIdentifierUpdater(
         hgnc_data=create_hgnc_dict(), gene_identifier="ensembl_id"
     )
-
-    def handle_empty_results(result_file: Path):
-        if disease_analysis:
-            create_empty_results_file(output_dir, result_file, "disease")
-        if gene_analysis:
-            create_empty_results_file(output_dir, result_file, "gene")
-
     for ontogpt_result_file in files_with_suffix(raw_results_dir, ".json"):
-        try:
-            ontogpt_result = read_ontogpt_result(ontogpt_result_file)
+        ontogpt_result = read_ontogpt_result(ontogpt_result_file, gene_analysis, disease_analysis)
+        if not ontogpt_result:
+            continue
+        if disease_analysis:
+            pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(
+                ontogpt_result
+            ).extract_pheval_requirements()
+            generate_pheval_result(
+                pheval_disease_result,
+                sort_order,
+                output_dir,
+                trim_ontogpt_result(ontogpt_result_file),
+            )
 
-            if len(ontogpt_result) == 0:
-                handle_empty_results(ontogpt_result_file)
-
-            if disease_analysis:
-                pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(
-                    ontogpt_result
-                ).extract_pheval_requirements()
-                generate_pheval_result(
-                    pheval_disease_result,
-                    sort_order,
-                    output_dir,
-                    trim_ontogpt_result(ontogpt_result_file),
-                )
-
-            if gene_analysis:
-                pheval_gene_result = PhEvalGeneResultFromOntoGPT(
-                    ontogpt_result, gene_identifier_updator
-                ).extract_pheval_requirements()
-                generate_pheval_result(
-                    pheval_gene_result,
-                    sort_order,
-                    output_dir,
-                    trim_ontogpt_result(ontogpt_result_file),
-                )
-
-        except KeyError:
-            handle_empty_results(ontogpt_result_file)
+        if gene_analysis:
+            pheval_gene_result = PhEvalGeneResultFromOntoGPT(
+                ontogpt_result, gene_identifier_updator
+            ).extract_pheval_requirements()
+            generate_pheval_result(
+                pheval_gene_result,
+                sort_order,
+                output_dir,
+                trim_ontogpt_result(ontogpt_result_file),
+            )
 
 
 @click.command("standardise")
