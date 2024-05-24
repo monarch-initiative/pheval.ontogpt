@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Dict, List, Union
 
 import click
 from pheval.post_processing.post_processing import (
@@ -11,6 +12,74 @@ from pheval.utils.file_utils import files_with_suffix
 from pheval.utils.phenopacket_utils import GeneIdentifierUpdater, create_hgnc_dict
 
 
+class CheckResultFormat:
+    """
+    Class to check the format of a parsed JSON result for required keys
+    based on the type of analysis.
+
+    Attributes:
+        parsed_result (Union[str, List[str]]): The parsed JSON result.
+        gene_analysis (bool): Flag to indicate if gene analysis keys are required.
+        disease_analysis (bool): Flag to indicate if disease analysis keys are required.
+    """
+
+    def __init__(
+        self, parsed_result: Union[Dict, List[str]], gene_analysis: bool, disease_analysis: bool
+    ):
+        """
+        Initialise the CheckResultFormat class with parsed JSON result and analysis flags.
+        """
+        self.parsed_result = parsed_result
+        self.gene_analysis = gene_analysis
+        self.disease_analysis = disease_analysis
+
+    def check_keys_in_dict_format_json(self) -> Union[Dict, None]:
+        """
+        Check for required keys in a dictionary format JSON result.
+
+        Returns:
+            Union[Dict, None]: The parsed result if required keys are present, otherwise None.
+        """
+        if self.gene_analysis and all(
+            key in self.parsed_result for key in ["score", "gene_symbol"]
+        ):
+            return self.parsed_result
+        elif self.disease_analysis and all(
+            key in self.parsed_result for key in ["disease_name", "omim_disease_id", "score"]
+        ):
+            return self.parsed_result
+
+    def check_keys_in_list_format_json(self) -> Union[List[Dict], None]:
+        """
+        Check for required keys in a list of dictionaries format JSON result.
+
+        Returns:
+            Union[List[Dict], None]: A list of dictionaries with required keys if any, otherwise None.
+        """
+        filtered_results = []
+        for entry in self.parsed_result:
+            if self.gene_analysis and all(key in entry for key in ["score", "gene_symbol"]):
+                filtered_results.append(entry)
+            elif self.disease_analysis and all(
+                key in entry for key in ["disease_name", "omim_disease_id", "score"]
+            ):
+                filtered_results.append(entry)
+        return filtered_results if filtered_results else None
+
+    def check_result_format(self) -> Union[Dict, List[Dict], None]:
+        """
+        Determine the format of the parsed JSON result and check for required keys.
+
+        Returns:
+            Union[Dict, List[Dict], None]: The parsed result if required keys are present, otherwise None.
+        """
+        if isinstance(self.parsed_result, list):
+            return self.check_keys_in_list_format_json()
+        if isinstance(self.parsed_result, dict):
+            return self.check_keys_in_dict_format_json()
+        return None
+
+
 def read_ontogpt_result(
     ontogpt_result_path: Path, gene_analysis: bool = False, disease_analysis: bool = False
 ) -> [dict]:
@@ -18,15 +87,7 @@ def read_ontogpt_result(
     with open(ontogpt_result_path, "r") as result:
         parsed_result = json.load(result)
     result.close()
-    if all(key in parsed_result for key in ["score", "gene_symbol"]) and gene_analysis:
-        return parsed_result
-    if (
-        all(key in parsed_result for key in ["score", "disease_name", "omim_disease_id"])
-        and disease_analysis
-    ):
-        return parsed_result
-    else:
-        return None
+    return CheckResultFormat(parsed_result, gene_analysis, disease_analysis).check_result_format()
 
 
 def trim_ontogpt_result(ontogpt_result_path: Path) -> Path:
@@ -164,6 +225,7 @@ def create_standardised_results(
     for ontogpt_result_file in files_with_suffix(raw_results_dir, ".json"):
         ontogpt_result = read_ontogpt_result(ontogpt_result_file, gene_analysis, disease_analysis)
         if not ontogpt_result:
+            print(ontogpt_result_file)
             continue
         if disease_analysis:
             pheval_disease_result = PhEvalDiseaseResultFromOntoGPT(
