@@ -49,7 +49,7 @@ def run_phenopackets(
     constrained_list_path: Path = None,
 ) -> None:
     """Run a directory of phenopackets on the basic PhenoEngine."""
-    pheno_engine = PhenoEngine(model=model)
+    pheno_engine = PhenoEngine(model=model, model_source="openai")
     for phenopacket_path in all_files(phenopacket_dir):
         phenopacket = phenopacket_reader(phenopacket_path)
         clean_phenopacket = PhenopacketCleaner(phenopacket).clean_phenopacket()
