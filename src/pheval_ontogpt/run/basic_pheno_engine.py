@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Union
 
-import openai.error
 from jinja2 import Template
 from oaklib import get_adapter
 from oaklib.datamodels.text_annotator import TextAnnotationConfiguration
@@ -60,42 +59,39 @@ class PhenoEngine(KnowledgeEngine):
             with open(template_path) as file:
                 template_txt = file.read()
                 template = Template(template_txt)
-        try:
-            hpo_terms = [hpo_term.type.label for hpo_term in phenopacket.phenotypic_features]
-            if constrained_list is None:
-                prompt = template.render(
-                    hpo_terms=hpo_terms,
-                )
-            else:
-                prompt = template.render(hpo_terms=hpo_terms, constrained_list=constrained_list)
-            payload = self.client.complete(prompt, max_tokens=self.completion_length)
-            payload = payload.replace(",\n  }", "\n  }")
-            payload = payload.replace('"}', "}")
-            payload = payload.replace("},\n ]", "}\n ]")
-            last_brace_index = payload.rfind("}")
-            payload = payload[: last_brace_index + 1] + payload[last_brace_index + 1 :].lstrip(",")
-            try:  # try load as JSON
-                obj = json.loads(payload)
-                # self.enhance_payload(obj)
-                return obj
-            except json.JSONDecodeError as e:
-                logger.error(f"Error decoding - trying again: {payload}")
-                match = re.search(r"\[.*?\]", payload, re.DOTALL)
-                if match:
-                    if match.group() != payload:
-                        try:
-                            obj = json.loads(match.group())
-                            # self.enhance_payload(obj)
-                            return obj
-                        except json.JSONDecodeError as e:
-                            logger.error(f"Error decoding JSON: {e}")
-                            logger.error(f"Payload: {payload}")
-                            return []
-                logger.error(f"Error decoding JSON: {e}")
-                logger.error(f"Payload: {payload}")
-            return []
-        except openai.error.InvalidRequestError:
-            return []
+        hpo_terms = [hpo_term.type.label for hpo_term in phenopacket.phenotypic_features]
+        if constrained_list is None:
+            prompt = template.render(
+                hpo_terms=hpo_terms,
+            )
+        else:
+            prompt = template.render(hpo_terms=hpo_terms, constrained_list=constrained_list)
+        payload = self.client.complete(prompt, max_tokens=self.completion_length)
+        payload = payload.replace(",\n  }", "\n  }")
+        payload = payload.replace('"}', "}")
+        payload = payload.replace("},\n ]", "}\n ]")
+        last_brace_index = payload.rfind("}")
+        payload = payload[: last_brace_index + 1] + payload[last_brace_index + 1 :].lstrip(",")
+        try:  # try load as JSON
+            obj = json.loads(payload)
+            # self.enhance_payload(obj)
+            return obj
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding - trying again: {payload}")
+            match = re.search(r"\[.*?\]", payload, re.DOTALL)
+            if match:
+                if match.group() != payload:
+                    try:
+                        obj = json.loads(match.group())
+                        # self.enhance_payload(obj)
+                        return obj
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Error decoding JSON: {e}")
+                        logger.error(f"Payload: {payload}")
+                        return []
+            logger.error(f"Error decoding JSON: {e}")
+            logger.error(f"Payload: {payload}")
+        return []
 
     def evaluate(self, phenopackets: List[Phenopacket]) -> List[DiagnosisPrediction]:
         mondo = self.mondo
